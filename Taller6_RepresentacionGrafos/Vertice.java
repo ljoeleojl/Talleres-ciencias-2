@@ -13,6 +13,10 @@ public class Vertice {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getDato() {
         return dato;
     }
@@ -23,6 +27,9 @@ public class Vertice {
 
     @Override
     public String toString() {
-        return id + " (" + dato + ")";
+        return "Vertice{" +
+                "id='" + id + '\'' +
+                ", dato='" + dato + '\'' +
+                '}';
     }
 }

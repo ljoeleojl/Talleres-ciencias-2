@@ -1,16 +1,15 @@
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Grafo {
 
-    private List<Vertice> vertices;
-    private List<Relacion> relaciones;
+    private ArrayList<Vertice> vertices;
+    private ArrayList<Relacion> relaciones;
     private boolean dirigido;
 
     public Grafo(boolean dirigido) {
-        vertices = new ArrayList<Vertice>();
-        relaciones = new ArrayList<Relacion>();
+        this.vertices = new ArrayList<Vertice>();
+        this.relaciones = new ArrayList<Relacion>();
         this.dirigido = dirigido;
     }
 
@@ -18,99 +17,113 @@ public class Grafo {
         return dirigido;
     }
 
-    private Vertice buscarVertice(String id) {
-        for (int i = 0; i < vertices.size(); i++) {
-            Vertice vertice = vertices.get(i);
+    // =========================
+    // BUSCAR VERTICES
+    // =========================
 
-            if (vertice.getId().equals(id)) {
-                return vertice;
-            }
-        }
-
-        return null;
-    }
-
-    private Relacion buscarRelacion(String id) {
-        for (int i = 0; i < relaciones.size(); i++) {
-            Relacion relacion = relaciones.get(i);
-
-            if (relacion.getId().equals(id)) {
-                return relacion;
-            }
-        }
-
-        return null;
-    }
-
-    private int obtenerIndiceVertice(String id) {
+    public Vertice buscarVertice(String id) {
         for (int i = 0; i < vertices.size(); i++) {
             if (vertices.get(i).getId().equals(id)) {
-                return i;
+                return vertices.get(i);
             }
         }
 
-        return -1;
+        return null;
     }
 
-    private String formatearNumero(double numero) {
-        if (numero == (long) numero) {
-            return String.valueOf((long) numero);
+    // =========================
+    // BUSCAR RELACIONES
+    // =========================
+
+    public Relacion buscarRelacion(String id) {
+        for (int i = 0; i < relaciones.size(); i++) {
+            if (relaciones.get(i).getId().equals(id)) {
+                return relaciones.get(i);
+            }
         }
 
-        return String.valueOf(numero);
+        return null;
     }
 
-    // CRUD DE VERTICES
+    // =========================
+    // AGREGAR VERTICE
+    // =========================
 
     public boolean agregarVertice(String id, String dato) {
-        if (id == null || id.trim().isEmpty()
-                || buscarVertice(id) != null) {
+        if (id == null || id.trim().isEmpty()) {
             return false;
         }
 
-        vertices.add(new Vertice(id, dato));
-        return true;
-    }
-
-    public boolean eliminarVertice(String id) {
-        if (buscarVertice(id) == null) {
+        if (dato == null) {
             return false;
         }
 
-        for (int i = relaciones.size() - 1; i >= 0; i--) {
-            if (relaciones.get(i).contieneVertice(id)) {
-                relaciones.remove(i);
-            }
+        if (buscarVertice(id) != null) {
+            return false;
         }
 
-        for (int i = 0; i < vertices.size(); i++) {
-            if (vertices.get(i).getId().equals(id)) {
-                vertices.remove(i);
-                break;
-            }
-        }
+        Vertice nuevoVertice = new Vertice(id, dato);
+        vertices.add(nuevoVertice);
 
         return true;
     }
+
+    // =========================
+    // ACTUALIZAR VERTICE
+    // =========================
 
     public boolean actualizarVertice(String id, String nuevoDato) {
+        Vertice vertice = buscarVertice(id);
+
+        if (vertice == null || nuevoDato == null) {
+            return false;
+        }
+
+        vertice.setDato(nuevoDato);
+
+        return true;
+    }
+
+    // =========================
+    // ELIMINAR VERTICE
+    // =========================
+
+    public boolean eliminarVertice(String id) {
         Vertice vertice = buscarVertice(id);
 
         if (vertice == null) {
             return false;
         }
 
-        vertice.setDato(nuevoDato);
+        for (int i = relaciones.size() - 1; i >= 0; i--) {
+            Relacion relacion = relaciones.get(i);
+
+            if (relacion.getVertice1().equals(id)
+                    || relacion.getVertice2().equals(id)) {
+                relaciones.remove(i);
+            }
+        }
+
+        vertices.remove(vertice);
+
         return true;
     }
 
-    // CRUD DE RELACIONES
+    // =========================
+    // AGREGAR RELACION
+    // =========================
 
-    public boolean agregarRelacion(String id, String vertice1,
-                                   String vertice2, double peso) {
+    public boolean agregarRelacion(
+            String id,
+            String vertice1,
+            String vertice2,
+            double peso) {
 
-        if (id == null || id.trim().isEmpty()
-                || buscarRelacion(id) != null) {
+        if (id == null || id.trim().isEmpty()) {
+            return false;
+        }
+
+        if (buscarRelacion(id) != null) {
             return false;
         }
 
@@ -119,6 +132,18 @@ public class Grafo {
             return false;
         }
 
+        if (!Double.isFinite(peso) || peso < 0) {
+            return false;
+        }
+
+        /*
+         * Se comprueba si ya existe una relación entre los dos
+         * vértices, sin importar el orden de los extremos.
+         *
+         * Por tanto, si existe A -> B, no se puede agregar B -> A.
+         * Esta restricción se aplica tanto a grafos dirigidos
+         * como a grafos no dirigidos.
+         */
         for (int i = 0; i < relaciones.size(); i++) {
             Relacion relacion = relaciones.get(i);
 
@@ -130,28 +155,22 @@ public class Grafo {
                     relacion.getVertice1().equals(vertice2)
                     && relacion.getVertice2().equals(vertice1);
 
-            if (mismaDireccion || (!dirigido && direccionInversa)) {
+            if (mismaDireccion || direccionInversa) {
                 return false;
             }
         }
 
-        relaciones.add(
-                new Relacion(id, vertice1, vertice2, peso)
-        );
+        Relacion nuevaRelacion =
+                new Relacion(id, vertice1, vertice2, peso);
+
+        relaciones.add(nuevaRelacion);
 
         return true;
     }
 
-    public boolean eliminarRelacion(String id) {
-        for (int i = 0; i < relaciones.size(); i++) {
-            if (relaciones.get(i).getId().equals(id)) {
-                relaciones.remove(i);
-                return true;
-            }
-        }
-
-        return false;
-    }
+    // =========================
+    // ACTUALIZAR RELACION
+    // =========================
 
     public boolean actualizarRelacion(String id, double nuevoPeso) {
         Relacion relacion = buscarRelacion(id);
@@ -160,81 +179,123 @@ public class Grafo {
             return false;
         }
 
+        if (!Double.isFinite(nuevoPeso) || nuevoPeso < 0) {
+            return false;
+        }
+
         relacion.setPeso(nuevoPeso);
+
         return true;
     }
 
-    // MOSTRAR VERTICES
+    // =========================
+    // ELIMINAR RELACION
+    // =========================
 
-    public void mostrarVertices() {
-        System.out.println("\n========== VERTICES ==========");
+    public boolean eliminarRelacion(String id) {
+        Relacion relacion = buscarRelacion(id);
 
-        if (vertices.isEmpty()) {
-            System.out.println("No hay vertices.");
-            return;
+        if (relacion == null) {
+            return false;
         }
 
-        for (int i = 0; i < vertices.size(); i++) {
-            System.out.println(vertices.get(i));
-        }
+        relaciones.remove(relacion);
+
+        return true;
     }
 
-    // MOSTRAR RELACIONES
+    // =========================
+    // MOSTRAR VERTICES
+    // =========================
 
-    public void mostrarRelaciones() {
-        System.out.println("\n========== RELACIONES ==========");
-
-        if (relaciones.isEmpty()) {
-            System.out.println("No hay relaciones.");
+    public void mostrarVertices() {
+        if (vertices.isEmpty()) {
+            System.out.println("El grafo no tiene vertices.");
             return;
         }
 
-        for (int i = 0; i < relaciones.size(); i++) {
-            Relacion relacion = relaciones.get(i);
+        System.out.println("\n--- VERTICES ---");
 
-            String separador = dirigido ? " -> " : " -- ";
+        for (int i = 0; i < vertices.size(); i++) {
+            Vertice vertice = vertices.get(i);
 
             System.out.println(
-                    relacion.getId() + ": "
-                    + relacion.getVertice1()
-                    + separador
-                    + formatearNumero(relacion.getPeso())
-                    + separador
-                    + relacion.getVertice2()
+                    "ID: " + vertice.getId()
+                    + " | Dato: " + vertice.getDato()
             );
         }
     }
 
-    // MATRIZ DE ADYACENCIA
+    // =========================
+    // MOSTRAR RELACIONES
+    // =========================
 
-    public void mostrarMatrizAdyacencia() {
-        System.out.println("\n========== MATRIZ DE ADYACENCIA ==========");
-
-        if (vertices.isEmpty()) {
-            System.out.println("No hay vertices.");
+    public void mostrarRelaciones() {
+        if (relaciones.isEmpty()) {
+            System.out.println("El grafo no tiene relaciones.");
             return;
         }
 
-        int cantidadVertices = vertices.size();
-
-        double[][] matriz =
-                new double[cantidadVertices][cantidadVertices];
+        System.out.println("\n--- RELACIONES ---");
 
         for (int i = 0; i < relaciones.size(); i++) {
             Relacion relacion = relaciones.get(i);
 
-            int posicion1 =
-                    obtenerIndiceVertice(relacion.getVertice1());
+            String separador;
 
-            int posicion2 =
-                    obtenerIndiceVertice(relacion.getVertice2());
+            if (dirigido) {
+                separador = " -> ";
+            } else {
+                separador = " -- ";
+            }
 
-            matriz[posicion1][posicion2] = relacion.getPeso();
+            System.out.println(
+                    "ID: " + relacion.getId()
+                    + " | "
+                    + relacion.getVertice1()
+                    + separador
+                    + relacion.getVertice2()
+                    + " | Peso: " + relacion.getPeso()
+            );
+        }
+    }
 
-            if (!dirigido) {
-                matriz[posicion2][posicion1] = relacion.getPeso();
+    // =========================
+    // MATRIZ DE ADYACENCIA
+    // =========================
+
+    public void mostrarMatrizAdyacencia() {
+        int cantidadVertices = vertices.size();
+
+        /*
+         * Se usa null para representar que no existe una relación.
+         * Esto permite diferenciar una relación de peso 0
+         * de la ausencia de una relación.
+         */
+        Double[][] matriz = new Double[cantidadVertices][cantidadVertices];
+
+        for (int i = 0; i < cantidadVertices; i++) {
+            for (int j = 0; j < cantidadVertices; j++) {
+                matriz[i][j] = null;
             }
         }
+
+        for (int i = 0; i < relaciones.size(); i++) {
+            Relacion relacion = relaciones.get(i);
+
+            int origen = obtenerIndiceVertice(relacion.getVertice1());
+            int destino = obtenerIndiceVertice(relacion.getVertice2());
+
+            if (origen != -1 && destino != -1) {
+                matriz[origen][destino] = relacion.getPeso();
+
+                if (!dirigido) {
+                    matriz[destino][origen] = relacion.getPeso();
+                }
+            }
+        }
+
+        System.out.println("\n--- MATRIZ DE ADYACENCIA ---");
 
         System.out.printf("%12s", "");
 
@@ -248,80 +309,83 @@ public class Grafo {
             System.out.printf("%12s", vertices.get(i).getId());
 
             for (int j = 0; j < cantidadVertices; j++) {
-                System.out.printf(
-                        "%12s",
-                        formatearNumero(matriz[i][j])
-                );
+                if (matriz[i][j] == null) {
+                    System.out.printf("%12s", "-");
+                } else {
+                    System.out.printf("%12s", matriz[i][j]);
+                }
             }
 
             System.out.println();
         }
     }
 
+    // =========================
     // LISTA DE ADYACENCIA
+    // =========================
 
     public void mostrarListaAdyacencia() {
-        System.out.println("\n========== LISTA DE ADYACENCIA ==========");
+        System.out.println("\n--- LISTA DE ADYACENCIA ---");
 
         if (vertices.isEmpty()) {
-            System.out.println("No hay vertices.");
+            System.out.println("El grafo no tiene vertices.");
             return;
         }
 
         for (int i = 0; i < vertices.size(); i++) {
             Vertice vertice = vertices.get(i);
-            String id = vertice.getId();
 
-            System.out.print(id + " -> ");
+            System.out.print(vertice.getId() + ": ");
 
-            boolean tieneRelaciones = false;
+            boolean primeraRelacion = true;
 
             for (int j = 0; j < relaciones.size(); j++) {
                 Relacion relacion = relaciones.get(j);
-                String vecino = null;
 
-                if (relacion.saleDe(id)) {
-                    vecino = relacion.getVertice2();
-                } else if (!dirigido
-                        && relacion.llegaA(id)) {
-                    vecino = relacion.getVertice1();
-                }
-
-                if (vecino != null) {
-                    if (tieneRelaciones) {
+                if (relacion.getVertice1().equals(vertice.getId())) {
+                    if (!primeraRelacion) {
                         System.out.print(", ");
                     }
 
                     System.out.print(
-                            "(" + vecino
-                            + ", peso="
-                            + formatearNumero(relacion.getPeso())
-                            + ")"
+                            relacion.getVertice2()
+                            + " (peso: " + relacion.getPeso() + ")"
                     );
 
-                    tieneRelaciones = true;
+                    primeraRelacion = false;
+                }
+
+                if (!dirigido
+                        && relacion.getVertice2().equals(vertice.getId())) {
+
+                    if (!primeraRelacion) {
+                        System.out.print(", ");
+                    }
+
+                    System.out.print(
+                            relacion.getVertice1()
+                            + " (peso: " + relacion.getPeso() + ")"
+                    );
+
+                    primeraRelacion = false;
                 }
             }
 
-            if (!tieneRelaciones) {
-                System.out.print("∅");
+            if (primeraRelacion) {
+                System.out.print("Sin relaciones");
             }
 
             System.out.println();
         }
     }
 
+    // =========================
     // MATRIZ DE INCIDENCIA
-    // Filas: relaciones. Columnas: vertices.
+    // Filas: relaciones
+    // Columnas: vertices
+    // =========================
 
     public void mostrarMatrizIncidencia() {
-        System.out.println("\n========== MATRIZ DE INCIDENCIA ==========");
-
-        if (relaciones.isEmpty()) {
-            System.out.println("No hay relaciones.");
-            return;
-        }
-
         int cantidadRelaciones = relaciones.size();
         int cantidadVertices = vertices.size();
 
@@ -331,28 +395,23 @@ public class Grafo {
         for (int i = 0; i < cantidadRelaciones; i++) {
             Relacion relacion = relaciones.get(i);
 
-            int posicion1 =
-                    obtenerIndiceVertice(relacion.getVertice1());
+            int origen = obtenerIndiceVertice(relacion.getVertice1());
+            int destino = obtenerIndiceVertice(relacion.getVertice2());
 
-            int posicion2 =
-                    obtenerIndiceVertice(relacion.getVertice2());
-
-            if (posicion1 == posicion2) {
-                // Convencion para un bucle dirigido:
-                // su contribucion de incidencia es cero.
-                continue;
-            }
-
-            if (dirigido) {
-                matriz[i][posicion1] = -relacion.getPeso();
-                matriz[i][posicion2] = relacion.getPeso();
-            } else {
-                matriz[i][posicion1] = relacion.getPeso();
-                matriz[i][posicion2] = relacion.getPeso();
+            if (origen != -1 && destino != -1) {
+                if (dirigido) {
+                    matriz[i][origen] = -relacion.getPeso();
+                    matriz[i][destino] = relacion.getPeso();
+                } else {
+                    matriz[i][origen] = relacion.getPeso();
+                    matriz[i][destino] = relacion.getPeso();
+                }
             }
         }
 
-        System.out.printf("%12s", "Relacion");
+        System.out.println("\n--- MATRIZ DE INCIDENCIA ---");
+
+        System.out.printf("%12s", "");
 
         for (int i = 0; i < cantidadVertices; i++) {
             System.out.printf("%12s", vertices.get(i).getId());
@@ -361,44 +420,69 @@ public class Grafo {
         System.out.println();
 
         for (int i = 0; i < cantidadRelaciones; i++) {
-            System.out.printf(
-                    "%12s", relaciones.get(i).getId()
-            );
+            System.out.printf("%12s", relaciones.get(i).getId());
 
             for (int j = 0; j < cantidadVertices; j++) {
-                System.out.printf(
-                        "%12s",
-                        formatearNumero(matriz[i][j])
-                );
+                System.out.printf("%12s", matriz[i][j]);
             }
 
             System.out.println();
         }
+
+        if (cantidadRelaciones == 0) {
+            System.out.println("El grafo no tiene relaciones.");
+        }
     }
 
+    // =========================
     // LISTA DE INCIDENCIA
+    // =========================
 
     public void mostrarListaIncidencia() {
-        System.out.println("\n========== LISTA DE INCIDENCIA ==========");
+        System.out.println("\n--- LISTA DE INCIDENCIA ---");
 
         if (relaciones.isEmpty()) {
-            System.out.println("No hay relaciones.");
+            System.out.println("El grafo no tiene relaciones.");
             return;
         }
 
         for (int i = 0; i < relaciones.size(); i++) {
             Relacion relacion = relaciones.get(i);
 
-            String separador = dirigido ? " -> " : " -- ";
-
-            System.out.println(
-                    relacion.getId() + ": "
-                    + relacion.getVertice1()
-                    + separador
-                    + formatearNumero(relacion.getPeso())
-                    + separador
-                    + relacion.getVertice2()
+            System.out.print(
+                    relacion.getId()
+                    + " (peso: " + relacion.getPeso() + "): "
             );
+
+            if (dirigido) {
+                System.out.println(
+                        relacion.getVertice1()
+                        + " (-" + relacion.getPeso() + ") -> "
+                        + relacion.getVertice2()
+                        + " (+" + relacion.getPeso() + ")"
+                );
+            } else {
+                System.out.println(
+                        relacion.getVertice1()
+                        + " (" + relacion.getPeso() + ") -- "
+                        + relacion.getVertice2()
+                        + " (" + relacion.getPeso() + ")"
+                );
+            }
         }
+    }
+
+    // =========================
+    // OBTENER INDICE DE VERTICE
+    // =========================
+
+    private int obtenerIndiceVertice(String id) {
+        for (int i = 0; i < vertices.size(); i++) {
+            if (vertices.get(i).getId().equals(id)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

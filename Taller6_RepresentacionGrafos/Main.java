@@ -4,124 +4,73 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("======================================");
-        System.out.println("       REPRESENTACIONES DE GRAFOS");
-        System.out.println("======================================");
-        System.out.println("1. Grafo dirigido y ponderado");
-        System.out.println("2. Grafo no dirigido y ponderado");
+        Grafo grafo = null;
 
-        int tipo;
+        System.out.println("================================");
+        System.out.println("       SISTEMA DE GRAFOS");
+        System.out.println("================================");
+        System.out.println("1. Grafo dirigido");
+        System.out.println("2. Grafo no dirigido");
+        System.out.print("Seleccione el tipo de grafo: ");
 
-        do {
-            tipo = leerEntero(scanner, "Seleccione el tipo de grafo: ");
+        int tipoGrafo = leerEntero(scanner);
 
-            if (tipo != 1 && tipo != 2) {
-                System.out.println("Seleccione 1 o 2.");
-            }
-        } while (tipo != 1 && tipo != 2);
-
-        Grafo grafo = new Grafo(tipo == 1);
-
-        int opcion;
-
-        do {
-            mostrarMenuPrincipal(grafo);
-
-            opcion = leerEntero(scanner, "Seleccione una opcion: ");
-
-            switch (opcion) {
-                case 1:
-                    menuVertices(grafo, scanner);
-                    break;
-
-                case 2:
-                    menuRelaciones(grafo, scanner);
-                    break;
-
-                case 3:
-                    grafo.mostrarMatrizAdyacencia();
-                    break;
-
-                case 4:
-                    grafo.mostrarListaAdyacencia();
-                    break;
-
-                case 5:
-                    grafo.mostrarMatrizIncidencia();
-                    break;
-
-                case 6:
-                    grafo.mostrarListaIncidencia();
-                    break;
-
-                case 7:
-                    grafo.mostrarVertices();
-                    grafo.mostrarRelaciones();
-                    break;
-
-                case 0:
-                    System.out.println("Programa finalizado.");
-                    break;
-
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } while (opcion != 0);
-
-        scanner.close();
-    }
-
-    private static void mostrarMenuPrincipal(Grafo grafo) {
-        System.out.println("\n======================================");
-        System.out.println("       REPRESENTACIONES DE GRAFOS");
-
-        if (grafo.esDirigido()) {
-            System.out.println("       GRAFO DIRIGIDO Y PONDERADO");
-        } else {
-            System.out.println("     GRAFO NO DIRIGIDO Y PONDERADO");
+        while (tipoGrafo != 1 && tipoGrafo != 2) {
+            System.out.println("Opcion no valida.");
+            System.out.print("Seleccione 1 o 2: ");
+            tipoGrafo = leerEntero(scanner);
         }
 
-        System.out.println("======================================");
-        System.out.println("1. Gestionar vertices");
-        System.out.println("2. Gestionar relaciones");
-        System.out.println("3. Mostrar matriz de adyacencia");
-        System.out.println("4. Mostrar lista de adyacencia");
-        System.out.println("5. Mostrar matriz de incidencia");
-        System.out.println("6. Mostrar lista de incidencia");
-        System.out.println("7. Mostrar grafo completo");
-        System.out.println("0. Salir");
-        System.out.println("======================================");
-    }
+        if (tipoGrafo == 1) {
+            grafo = new Grafo(true);
+            System.out.println("Se creo un grafo dirigido.");
+        } else {
+            grafo = new Grafo(false);
+            System.out.println("Se creo un grafo no dirigido.");
+        }
 
-    private static void menuVertices(Grafo grafo, Scanner scanner) {
         int opcion;
 
         do {
-            System.out.println("\n========== GESTION DE VERTICES ==========");
+            System.out.println("\n================================");
+            System.out.println("             MENU");
+            System.out.println("================================");
             System.out.println("1. Agregar vertice");
-            System.out.println("2. Eliminar vertice");
-            System.out.println("3. Actualizar vertice");
+            System.out.println("2. Actualizar vertice");
+            System.out.println("3. Eliminar vertice");
             System.out.println("4. Mostrar vertices");
-            System.out.println("0. Volver");
+            System.out.println("5. Agregar relacion");
+            System.out.println("6. Actualizar peso de relacion");
+            System.out.println("7. Eliminar relacion");
+            System.out.println("8. Mostrar relaciones");
+            System.out.println("9. Mostrar matriz de adyacencia");
+            System.out.println("10. Mostrar lista de adyacencia");
+            System.out.println("11. Mostrar matriz de incidencia");
+            System.out.println("12. Mostrar lista de incidencia");
+            System.out.println("0. Salir");
+            System.out.print("Seleccione una opcion: ");
 
-            opcion = leerEntero(scanner, "Seleccione una opcion: ");
+            opcion = leerEntero(scanner);
 
             switch (opcion) {
+
                 case 1: {
-                    System.out.print("ID del vertice: ");
+                    System.out.print("Ingrese el ID del vertice: ");
                     String id = scanner.nextLine();
 
-                    System.out.print("Dato del vertice: ");
+                    System.out.print("Ingrese el dato del vertice: ");
                     String dato = scanner.nextLine();
 
                     if (grafo.agregarVertice(id, dato)) {
                         System.out.println("Vertice agregado correctamente.");
                     } else {
                         System.out.println(
-                                "No se pudo agregar. "
-                                + "El ID esta vacio o ya existe."
+                                "No se pudo agregar el vertice. "
+                                + "Verifique que el ID no este vacio "
+                                + "y no exista previamente."
                         );
                     }
 
@@ -129,11 +78,33 @@ public class Main {
                 }
 
                 case 2: {
-                    System.out.print("ID del vertice a eliminar: ");
+                    System.out.print("Ingrese el ID del vertice: ");
+                    String id = scanner.nextLine();
+
+                    System.out.print("Ingrese el nuevo dato: ");
+                    String nuevoDato = scanner.nextLine();
+
+                    if (grafo.actualizarVertice(id, nuevoDato)) {
+                        System.out.println("Vertice actualizado correctamente.");
+                    } else {
+                        System.out.println(
+                                "No se pudo actualizar. "
+                                + "El vertice no existe."
+                        );
+                    }
+
+                    break;
+                }
+
+                case 3: {
+                    System.out.print("Ingrese el ID del vertice: ");
                     String id = scanner.nextLine();
 
                     if (grafo.eliminarVertice(id)) {
-                        System.out.println("Vertice eliminado correctamente.");
+                        System.out.println(
+                                "Vertice eliminado correctamente. "
+                                + "Sus relaciones tambien fueron eliminadas."
+                        );
                     } else {
                         System.out.println("El vertice no existe.");
                     }
@@ -141,83 +112,78 @@ public class Main {
                     break;
                 }
 
-                case 3: {
-                    System.out.print("ID del vertice a actualizar: ");
-                    String id = scanner.nextLine();
-
-                    System.out.print("Nuevo dato: ");
-                    String dato = scanner.nextLine();
-
-                    if (grafo.actualizarVertice(id, dato)) {
-                        System.out.println("Vertice actualizado correctamente.");
-                    } else {
-                        System.out.println("El vertice no existe.");
-                    }
-
-                    break;
-                }
-
-                case 4:
+                case 4: {
                     grafo.mostrarVertices();
                     break;
+                }
 
-                case 0:
-                    break;
-
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } while (opcion != 0);
-    }
-
-    private static void menuRelaciones(Grafo grafo, Scanner scanner) {
-        int opcion;
-
-        do {
-            System.out.println("\n========== GESTION DE RELACIONES ==========");
-            System.out.println("1. Agregar relacion");
-            System.out.println("2. Eliminar relacion");
-            System.out.println("3. Actualizar relacion");
-            System.out.println("4. Mostrar relaciones");
-            System.out.println("0. Volver");
-
-            opcion = leerEntero(scanner, "Seleccione una opcion: ");
-
-            switch (opcion) {
-                case 1: {
-                    System.out.print("ID de la relacion: ");
+                case 5: {
+                    System.out.print("Ingrese el ID de la relacion: ");
                     String id = scanner.nextLine();
 
-                    System.out.print("Vertice de origen: ");
+                    System.out.print("Ingrese el ID del primer vertice: ");
                     String vertice1 = scanner.nextLine();
 
-                    System.out.print("Vertice de destino: ");
+                    System.out.print("Ingrese el ID del segundo vertice: ");
                     String vertice2 = scanner.nextLine();
 
-                    double peso = leerDouble(
-                            scanner, "Peso de la relacion: "
-                    );
+                    System.out.print("Ingrese el peso de la relacion: ");
+                    double peso = leerDouble(scanner);
 
                     if (grafo.agregarRelacion(
                             id, vertice1, vertice2, peso)) {
-                        System.out.println("Relacion agregada correctamente.");
+
+                        System.out.println(
+                                "Relacion agregada correctamente."
+                        );
+
                     } else {
                         System.out.println(
-                                "No se pudo agregar la relacion. "
-                                + "Verifique los ID, los vertices "
-                                + "y que no exista una relacion duplicada."
+                                "No se pudo agregar la relacion."
+                        );
+
+                        System.out.println(
+                                "Verifique que el ID de la relacion "
+                                + "no exista, que ambos vertices existan, "
+                                + "que el peso no sea negativo y que no "
+                                + "exista otra relacion entre esos vertices "
+                                + "en ninguna direccion."
                         );
                     }
 
                     break;
                 }
 
-                case 2: {
-                    System.out.print("ID de la relacion a eliminar: ");
+                case 6: {
+                    System.out.print("Ingrese el ID de la relacion: ");
+                    String id = scanner.nextLine();
+
+                    System.out.print("Ingrese el nuevo peso: ");
+                    double nuevoPeso = leerDouble(scanner);
+
+                    if (grafo.actualizarRelacion(id, nuevoPeso)) {
+                        System.out.println(
+                                "Peso actualizado correctamente."
+                        );
+                    } else {
+                        System.out.println(
+                                "No se pudo actualizar el peso. "
+                                + "Verifique que la relacion exista "
+                                + "y que el peso sea mayor o igual a cero."
+                        );
+                    }
+
+                    break;
+                }
+
+                case 7: {
+                    System.out.print("Ingrese el ID de la relacion: ");
                     String id = scanner.nextLine();
 
                     if (grafo.eliminarRelacion(id)) {
-                        System.out.println("Relacion eliminada correctamente.");
+                        System.out.println(
+                                "Relacion eliminada correctamente."
+                        );
                     } else {
                         System.out.println("La relacion no existe.");
                     }
@@ -225,60 +191,78 @@ public class Main {
                     break;
                 }
 
-                case 3: {
-                    System.out.print("ID de la relacion a actualizar: ");
-                    String id = scanner.nextLine();
-
-                    double peso = leerDouble(scanner, "Nuevo peso: ");
-
-                    if (grafo.actualizarRelacion(id, peso)) {
-                        System.out.println("Relacion actualizada correctamente.");
-                    } else {
-                        System.out.println("La relacion no existe.");
-                    }
-
-                    break;
-                }
-
-                case 4:
+                case 8: {
                     grafo.mostrarRelaciones();
                     break;
-
-                case 0:
-                    break;
-
-                default:
-                    System.out.println("Opcion no valida.");
-            }
-        } while (opcion != 0);
-    }
-
-    private static int leerEntero(Scanner scanner, String mensaje) {
-        while (true) {
-            try {
-                System.out.print(mensaje);
-                return Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Ingrese un numero entero valido.");
-            }
-        }
-    }
-
-    private static double leerDouble(Scanner scanner, String mensaje) {
-        while (true) {
-            try {
-                System.out.print(mensaje);
-                double numero = Double.parseDouble(scanner.nextLine());
-
-                if (Double.isNaN(numero) || Double.isInfinite(numero)) {
-                    System.out.println("Ingrese un numero finito.");
-                    continue;
                 }
 
-                return numero;
-            } catch (NumberFormatException e) {
-                System.out.println("Ingrese un numero valido.");
+                case 9: {
+                    grafo.mostrarMatrizAdyacencia();
+                    break;
+                }
+
+                case 10: {
+                    grafo.mostrarListaAdyacencia();
+                    break;
+                }
+
+                case 11: {
+                    grafo.mostrarMatrizIncidencia();
+                    break;
+                }
+
+                case 12: {
+                    grafo.mostrarListaIncidencia();
+                    break;
+                }
+
+                case 0: {
+                    System.out.println("Programa finalizado.");
+                    break;
+                }
+
+                default: {
+                    System.out.println("Opcion no valida.");
+                    break;
+                }
             }
+
+        } while (opcion != 0);
+
+        scanner.close();
+    }
+
+    // =========================
+    // LEER ENTERO
+    // =========================
+
+    private static int leerEntero(Scanner scanner) {
+        while (!scanner.hasNextInt()) {
+            System.out.println("Debe ingresar un numero entero.");
+            scanner.nextLine();
+            System.out.print("Intente nuevamente: ");
         }
+
+        int numero = scanner.nextInt();
+        scanner.nextLine();
+
+        return numero;
+    }
+
+    // =========================
+    // LEER NUMERO DECIMAL
+    // =========================
+
+    private static double leerDouble(Scanner scanner) {
+        while (!scanner.hasNextDouble()) {
+            System.out.println("Debe ingresar un numero valido.");
+            scanner.nextLine();
+            System.out.print("Intente nuevamente: ");
+        }
+
+        double numero = scanner.nextDouble();
+        scanner.nextLine();
+
+        return numero;
     }
 }
