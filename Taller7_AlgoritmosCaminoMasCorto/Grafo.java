@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 
 public class Grafo {
@@ -23,6 +22,28 @@ public class Grafo {
 
     public ArrayList<Relacion> getRelaciones() {
         return new ArrayList<Relacion>(relaciones);
+    }
+
+    // =========================
+    // VALIDAR PESO
+    // =========================
+
+    /*
+     * El peso debe ser un numero finito.
+     * Los pesos negativos solo se aceptan en grafos dirigidos:
+     * en un grafo no dirigido, una relacion negativa siempre
+     * forma un ciclo negativo (A -> B -> A -> ...).
+     */
+    private boolean pesoValido(double peso) {
+        if (!Double.isFinite(peso)) {
+            return false;
+        }
+
+        if (!dirigido && peso < 0) {
+            return false;
+        }
+
+        return true;
     }
 
     // =========================
@@ -148,7 +169,7 @@ public class Grafo {
             return false;
         }
 
-        if (!Double.isFinite(peso) || peso < 0) {
+        if (!pesoValido(peso)) {
             return false;
         }
 
@@ -191,7 +212,7 @@ public class Grafo {
             return false;
         }
 
-        if (!Double.isFinite(nuevoPeso) || nuevoPeso < 0) {
+        if (!pesoValido(nuevoPeso)) {
             return false;
         }
 
