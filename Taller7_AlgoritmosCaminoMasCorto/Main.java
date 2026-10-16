@@ -1,4 +1,3 @@
-
 import java.util.Scanner;
 
 public class Main {
@@ -39,21 +38,20 @@ public class Main {
             System.out.println("\n================================");
             System.out.println("             MENU");
             System.out.println("================================");
-            System.out.println("1. Agregar vertice");
-            System.out.println("2. Actualizar vertice");
-            System.out.println("3. Eliminar vertice");
-            System.out.println("4. Mostrar vertices");
+            System.out.println("1. Generar grafo de ejemplo");
+            System.out.println("2. Agregar vertice");
+            System.out.println("3. Actualizar vertice");
+            System.out.println("4. Eliminar vertice");
             System.out.println("5. Agregar relacion");
             System.out.println("6. Actualizar peso de relacion");
             System.out.println("7. Eliminar relacion");
-            System.out.println("8. Mostrar relaciones");
-            System.out.println("9. Mostrar matriz de adyacencia");
-            System.out.println("10. Mostrar lista de adyacencia");
-            System.out.println("11. Mostrar matriz de incidencia");
-            System.out.println("12. Mostrar lista de incidencia");
-            System.out.println("13. Algoritmo de Dijkstra");
-            System.out.println("14. Algoritmo de Bellman-Ford");
-            System.out.println("15. Algoritmo de Floyd-Warshall");
+            System.out.println("8. Mostrar matriz de adyacencia");
+            System.out.println("9. Mostrar lista de adyacencia");
+            System.out.println("10. Mostrar matriz de incidencia");
+            System.out.println("11. Mostrar lista de incidencia");
+            System.out.println("12. Algoritmo de Dijkstra");
+            System.out.println("13. Algoritmo de Bellman-Ford");
+            System.out.println("14. Algoritmo de Floyd-Warshall");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opcion: ");
 
@@ -62,6 +60,31 @@ public class Main {
             switch (opcion) {
 
                 case 1: {
+                    if (!grafo.getVertices().isEmpty()) {
+                        System.out.print(
+                                "El grafo actual se reemplazara "
+                                + "por el de ejemplo. Continuar? (s/n): "
+                        );
+
+                        String respuesta = scanner.nextLine().trim();
+
+                        if (!respuesta.equalsIgnoreCase("s")) {
+                            System.out.println("Operacion cancelada.");
+                            break;
+                        }
+                    }
+
+                    grafo = crearGrafoEjemplo(grafo.esDirigido());
+
+                    System.out.println(
+                            "Grafo de ejemplo generado: "
+                            + "6 vertices (A-F) y 9 relaciones (r1-r9)."
+                    );
+
+                    break;
+                }
+
+                case 2: {
                     System.out.print("Ingrese el ID del vertice: ");
                     String id = scanner.nextLine();
 
@@ -83,7 +106,7 @@ public class Main {
                     break;
                 }
 
-                case 2: {
+                case 3: {
                     System.out.print("Ingrese el ID del vertice: ");
                     String id = scanner.nextLine();
 
@@ -103,7 +126,7 @@ public class Main {
                     break;
                 }
 
-                case 3: {
+                case 4: {
                     System.out.print("Ingrese el ID del vertice: ");
                     String id = scanner.nextLine();
 
@@ -116,11 +139,6 @@ public class Main {
                         System.out.println("El vertice no existe.");
                     }
 
-                    break;
-                }
-
-                case 4: {
-                    grafo.mostrarVertices();
                     break;
                 }
 
@@ -151,11 +169,18 @@ public class Main {
 
                         System.out.println(
                                 "Verifique que el ID no exista, "
-                                + "que ambos vertices existan, "
-                                + "que el peso sea no negativo "
+                                + "que ambos vertices existan "
                                 + "y que no haya otra relacion entre "
                                 + "el mismo par de vertices."
                         );
+
+                        if (!grafo.esDirigido()) {
+                            System.out.println(
+                                    "Recuerde que en un grafo no "
+                                    + "dirigido no se aceptan "
+                                    + "pesos negativos."
+                            );
+                        }
                     }
 
                     break;
@@ -175,9 +200,16 @@ public class Main {
                     } else {
                         System.out.println(
                                 "No se pudo actualizar. "
-                                + "Compruebe que la relacion exista "
-                                + "y que el peso no sea negativo."
+                                + "Compruebe que la relacion exista."
                         );
+
+                        if (!grafo.esDirigido()) {
+                            System.out.println(
+                                    "Recuerde que en un grafo no "
+                                    + "dirigido no se aceptan "
+                                    + "pesos negativos."
+                            );
+                        }
                     }
 
                     break;
@@ -199,31 +231,26 @@ public class Main {
                 }
 
                 case 8: {
-                    grafo.mostrarRelaciones();
-                    break;
-                }
-
-                case 9: {
                     grafo.mostrarMatrizAdyacencia();
                     break;
                 }
 
-                case 10: {
+                case 9: {
                     grafo.mostrarListaAdyacencia();
                     break;
                 }
 
-                case 11: {
+                case 10: {
                     grafo.mostrarMatrizIncidencia();
                     break;
                 }
 
-                case 12: {
+                case 11: {
                     grafo.mostrarListaIncidencia();
                     break;
                 }
 
-                case 13: {
+                case 12: {
                     System.out.print(
                             "Ingrese el ID del vertice de origen: "
                     );
@@ -235,7 +262,7 @@ public class Main {
                     break;
                 }
 
-                case 14: {
+                case 13: {
                     System.out.print(
                             "Ingrese el ID del vertice de origen: "
                     );
@@ -247,7 +274,7 @@ public class Main {
                     break;
                 }
 
-                case 15: {
+                case 14: {
                     FloydWarshall.ejecutar(grafo);
 
                     break;
@@ -267,6 +294,36 @@ public class Main {
         } while (opcion != 0);
 
         scanner.close();
+    }
+
+    // =========================
+    // CREAR GRAFO DE EJEMPLO
+    // 6 vertices y 9 relaciones.
+    // Funciona igual en grafos dirigidos y no dirigidos,
+    // y todos los pesos son positivos (sirve con Dijkstra).
+    // =========================
+
+    private static Grafo crearGrafoEjemplo(boolean dirigido) {
+        Grafo grafo = new Grafo(dirigido);
+
+        grafo.agregarVertice("A", "Nodo A");
+        grafo.agregarVertice("B", "Nodo B");
+        grafo.agregarVertice("C", "Nodo C");
+        grafo.agregarVertice("D", "Nodo D");
+        grafo.agregarVertice("E", "Nodo E");
+        grafo.agregarVertice("F", "Nodo F");
+
+        grafo.agregarRelacion("r1", "A", "B", 4);
+        grafo.agregarRelacion("r2", "A", "C", 2);
+        grafo.agregarRelacion("r3", "B", "C", 1);
+        grafo.agregarRelacion("r4", "B", "D", 5);
+        grafo.agregarRelacion("r5", "C", "D", 8);
+        grafo.agregarRelacion("r6", "C", "E", 10);
+        grafo.agregarRelacion("r7", "D", "E", 2);
+        grafo.agregarRelacion("r8", "D", "F", 6);
+        grafo.agregarRelacion("r9", "E", "F", 3);
+
+        return grafo;
     }
 
     // =========================
