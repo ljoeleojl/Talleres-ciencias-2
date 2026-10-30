@@ -1,539 +1,418 @@
-
 import java.util.Scanner;
 
 public class Main {
 
+    private static final Scanner scanner = new Scanner(System.in);
+    private static Grafo grafo = new Grafo(true);
+
     public static void main(String[] args) {
-
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("==================================");
-        System.out.println("          SISTEMA DE GRAFOS");
-        System.out.println("==================================");
-
-        System.out.println("1. Grafo dirigido");
-        System.out.println("2. Grafo no dirigido");
-
-        System.out.print("Seleccione el tipo de grafo: ");
-
-        int tipo = leerEntero(scanner);
-
-        while (tipo != 1 && tipo != 2) {
-
-            System.out.println("Opcion no valida.");
-
-            System.out.print("Seleccione 1 o 2: ");
-
-            tipo = leerEntero(scanner);
-        }
-
-        Grafo grafo = new Grafo(tipo == 1);
-
         int opcion;
 
         do {
-
-            System.out.println("\n==================================");
-            System.out.println("               MENU");
-            System.out.println("==================================");
-
-            System.out.println("1. Generar grafo de ejemplo");
-
-            System.out.println("2. Agregar vertice");
-            System.out.println("3. Actualizar vertice");
-            System.out.println("4. Eliminar vertice");
-
-            System.out.println("5. Agregar relacion");
-            System.out.println("6. Actualizar relacion");
-            System.out.println("7. Eliminar relacion");
-
-            System.out.println("----------------------------------");
-
-            System.out.println("8. Mostrar vertices");
-            System.out.println("9. Mostrar relaciones");
-
-            System.out.println("10. Matriz de adyacencia");
-            System.out.println("11. Lista de adyacencia");
-
-            System.out.println("12. Matriz de incidencia");
-            System.out.println("13. Lista de incidencia");
-
-            System.out.println("----------------------------------");
-
-            System.out.println("14. Ford-Fulkerson");
-            System.out.println("15. Edmonds-Karp");
-
-            System.out.println("0. Salir");
-
-            System.out.println("==================================");
-
-            System.out.print("Seleccione una opcion: ");
-
-            opcion = leerEntero(scanner);
+            mostrarMenu();
+            opcion = leerEntero("Seleccione una opción: ");
 
             switch (opcion) {
+                case 1:
+                    crearGrafoDirigido();
+                    break;
 
-                // ==================================
-                // GENERAR GRAFO
-                // ==================================
+                case 2:
+                    crearGrafoNoDirigido();
+                    break;
 
-                case 1: {
-
-                    if (!grafo.getVertices().isEmpty()) {
-
-                        System.out.print(
-                                "Se reemplazara el grafo actual. "
-                                + "Continuar? (s/n): "
-                        );
-
-                        String respuesta = scanner.nextLine();
-
-                        if (!respuesta.equalsIgnoreCase("s")) {
-                            break;
-                        }
-                    }
-
+                case 3:
                     grafo = crearGrafoEjemplo();
-
                     System.out.println(
-                            "\nGrafo de ejemplo generado."
-                    );
-
-                    grafo.mostrarListaAdyacencia();
-
+                            "Grafo de ejemplo generado correctamente.");
+                    System.out.println("Origen: S | Destino: T");
+                    System.out.println(
+                            "Vértices: " + grafo.getVertices().size());
+                    System.out.println(
+                            "Relaciones: " + grafo.getRelaciones().size());
                     break;
-                }
 
-                // ==================================
-                // AGREGAR VERTICE
-                // ==================================
-
-                case 2: {
-
-                    System.out.print("ID: ");
-                    String id = scanner.nextLine();
-
-                    System.out.print("Dato: ");
-                    String dato = scanner.nextLine();
-
-                    if (grafo.agregarVertice(id, dato)) {
-                        System.out.println("Vertice agregado.");
-                    } else {
-                        System.out.println("No se pudo agregar.");
-                    }
-
+                case 4:
+                    agregarVertice();
                     break;
-                }
 
-                // ==================================
-                // ACTUALIZAR VERTICE
-                // ==================================
-
-                case 3: {
-
-                    System.out.print("ID del vertice: ");
-                    String id = scanner.nextLine();
-
-                    System.out.print("Nuevo dato: ");
-                    String dato = scanner.nextLine();
-
-                    if (grafo.actualizarVertice(id, dato)) {
-                        System.out.println("Vertice actualizado.");
-                    } else {
-                        System.out.println("No se pudo actualizar.");
-                    }
-
+                case 5:
+                    actualizarVertice();
                     break;
-                }
 
-                // ==================================
-                // ELIMINAR VERTICE
-                // ==================================
-
-                case 4: {
-
-                    System.out.print("ID del vertice: ");
-                    String id = scanner.nextLine();
-
-                    if (grafo.eliminarVertice(id)) {
-                        System.out.println("Vertice eliminado.");
-                    } else {
-                        System.out.println("Vertice inexistente.");
-                    }
-
+                case 6:
+                    eliminarVertice();
                     break;
-                }
 
-                // ==================================
-                // AGREGAR RELACION
-                // ==================================
-
-                case 5: {
-
-                    System.out.print("ID de la relacion: ");
-                    String id = scanner.nextLine();
-
-                    System.out.print("Vertice origen: ");
-                    String origen = scanner.nextLine();
-
-                    System.out.print("Vertice destino: ");
-                    String destino = scanner.nextLine();
-
-                    System.out.print("Peso/capacidad: ");
-                    double peso = leerDouble(scanner);
-
-                    if (grafo.agregarRelacion(
-                            id, origen, destino, peso)) {
-
-                        System.out.println("Relacion agregada.");
-
-                    } else {
-
-                        System.out.println(
-                                "No se pudo agregar la relacion."
-                        );
-                    }
-
+                case 7:
+                    agregarRelacion();
                     break;
-                }
 
-                // ==================================
-                // ACTUALIZAR RELACION
-                // ==================================
-
-                case 6: {
-
-                    System.out.print("ID de la relacion: ");
-                    String id = scanner.nextLine();
-
-                    System.out.print("Nuevo peso/capacidad: ");
-                    double peso = leerDouble(scanner);
-
-                    if (grafo.actualizarRelacion(id, peso)) {
-                        System.out.println("Relacion actualizada.");
-                    } else {
-                        System.out.println("No se pudo actualizar.");
-                    }
-
+                case 8:
+                    actualizarRelacion();
                     break;
-                }
 
-                // ==================================
-                // ELIMINAR RELACION
-                // ==================================
-
-                case 7: {
-
-                    System.out.print("ID de la relacion: ");
-                    String id = scanner.nextLine();
-
-                    if (grafo.eliminarRelacion(id)) {
-                        System.out.println("Relacion eliminada.");
-                    } else {
-                        System.out.println("Relacion inexistente.");
-                    }
-
+                case 9:
+                    eliminarRelacion();
                     break;
-                }
 
-                // ==================================
-                // MOSTRAR VERTICES
-                // ==================================
-
-                case 8: {
-
-                    grafo.mostrarVertices();
-
-                    break;
-                }
-
-                // ==================================
-                // MOSTRAR RELACIONES
-                // ==================================
-
-                case 9: {
-
-                    grafo.mostrarRelaciones();
-
-                    break;
-                }
-
-                // ==================================
-                // MATRIZ DE ADYACENCIA
-                // ==================================
-
-                case 10: {
-
+                case 10:
                     grafo.mostrarMatrizAdyacencia();
-
                     break;
-                }
 
-                // ==================================
-                // LISTA DE ADYACENCIA
-                // ==================================
-
-                case 11: {
-
+                case 11:
                     grafo.mostrarListaAdyacencia();
-
                     break;
-                }
 
-                // ==================================
-                // MATRIZ DE INCIDENCIA
-                // ==================================
-
-                case 12: {
-
+                case 12:
                     grafo.mostrarMatrizIncidencia();
-
                     break;
-                }
 
-                // ==================================
-                // LISTA DE INCIDENCIA
-                // ==================================
-
-                case 13: {
-
+                case 13:
                     grafo.mostrarListaIncidencia();
-
                     break;
-                }
 
-                // ==================================
-                // FORD-FULKERSON
-                // ==================================
-
-                case 14: {
-
-                    ejecutarFordFulkerson(scanner, grafo);
-
+                case 14:
+                    ejecutarFordFulkerson();
                     break;
-                }
 
-                // ==================================
-                // EDMONDS-KARP
-                // ==================================
-
-                case 15: {
-
-                    ejecutarEdmondsKarp(scanner, grafo);
-
+                case 15:
+                    ejecutarEdmondsKarp();
                     break;
-                }
 
-                // ==================================
-                // SALIR
-                // ==================================
+                case 16:
+                    compararAlgoritmos();
+                    break;
 
-                case 0: {
-
+                case 0:
                     System.out.println("Programa finalizado.");
-
                     break;
-                }
 
-                default: {
-
-                    System.out.println("Opcion no valida.");
-
-                    break;
-                }
+                default:
+                    System.out.println("Opción no válida.");
             }
+
+            System.out.println();
 
         } while (opcion != 0);
 
         scanner.close();
     }
 
-    // ==========================================
-    // EJECUTAR FORD-FULKERSON
-    // ==========================================
+    private static void mostrarMenu() {
+        System.out.println("========================================");
+        System.out.println("             GESTIÓN DE GRAFOS");
+        System.out.println("========================================");
+        System.out.println("1. Crear grafo dirigido");
+        System.out.println("2. Crear grafo no dirigido");
+        System.out.println("3. Generar grafo de ejemplo (imagen)");
+        System.out.println("4. Agregar vértice");
+        System.out.println("5. Actualizar vértice");
+        System.out.println("6. Eliminar vértice");
+        System.out.println("7. Agregar relación");
+        System.out.println("8. Actualizar capacidad/peso de relación");
+        System.out.println("9. Eliminar relación");
+        System.out.println("10. Mostrar matriz de adyacencia");
+        System.out.println("11. Mostrar lista de adyacencia");
+        System.out.println("12. Mostrar matriz de incidencia");
+        System.out.println("13. Mostrar lista de incidencia");
+        System.out.println("14. Ejecutar Ford-Fulkerson");
+        System.out.println("15. Ejecutar Edmonds-Karp");
+        System.out.println("16. Comparar algoritmos de flujo máximo");
+        System.out.println("0. Salir");
+        System.out.println("========================================");
 
-    private static void ejecutarFordFulkerson(
-            Scanner scanner,
-            Grafo grafo) {
-
-        System.out.println("\n--- FORD-FULKERSON ---");
-
-        try {
-
-            System.out.print("Vertice origen: ");
-            String origen = scanner.nextLine();
-
-            System.out.print("Vertice destino: ");
-            String destino = scanner.nextLine();
-
-            ResultadoFlujo resultado =
-                    FordFulkerson.ejecutar(
-                            grafo,
-                            origen,
-                            destino
-                    );
-
-            resultado.mostrarResultado();
-
-        } catch (IllegalArgumentException e) {
-
-            System.out.println("Error: " + e.getMessage());
-        }
+        System.out.println("Tipo de grafo activo: "
+                + (grafo.esDirigido() ? "DIRIGIDO" : "NO DIRIGIDO"));
     }
 
-    // ==========================================
-    // EJECUTAR EDMONDS-KARP
-    // ==========================================
-
-    private static void ejecutarEdmondsKarp(
-            Scanner scanner,
-            Grafo grafo) {
-
-        System.out.println("\n--- EDMONDS-KARP ---");
-
-        try {
-
-            System.out.print("Vertice origen: ");
-            String origen = scanner.nextLine();
-
-            System.out.print("Vertice destino: ");
-            String destino = scanner.nextLine();
-
-            ResultadoFlujo resultado =
-                    EdmondsKarp.ejecutar(
-                            grafo,
-                            origen,
-                            destino
-                    );
-
-            resultado.mostrarResultado();
-
-        } catch (IllegalArgumentException e) {
-
-            System.out.println("Error: " + e.getMessage());
-        }
+    private static void crearGrafoDirigido() {
+        grafo = new Grafo(true);
+        System.out.println("Se creó un grafo dirigido vacío.");
     }
 
-    // ==========================================
-    // CREAR GRAFO DEL EJERCICIO
-    // ==========================================
+    private static void crearGrafoNoDirigido() {
+        grafo = new Grafo(false);
+        System.out.println("Se creó un grafo no dirigido vacío.");
+    }
 
+    /*
+     * Grafo dirigido basado en la imagen.
+     * S es el origen y T es el destino.
+     */
     private static Grafo crearGrafoEjemplo() {
+        Grafo nuevoGrafo = new Grafo(true);
 
-        Grafo grafo = new Grafo(true);
+        String[] vertices = {
+            "S", "V1", "V2", "V3", "V4", "V5", "V6",
+            "V7", "V8", "V9", "V10", "V11", "T"
+        };
 
-        // VERTICES
-
-        grafo.agregarVertice("S", "Origen");
-
-        for (int i = 1; i <= 11; i++) {
-
-            grafo.agregarVertice(
-                    "v" + i,
-                    "Vertice " + i
+        for (String id : vertices) {
+            nuevoGrafo.agregarVertice(
+                    id,
+                    id.equals("S") ? "Origen"
+                    : id.equals("T") ? "Destino"
+                    : id
             );
         }
 
-        grafo.agregarVertice("T", "Destino");
+        // Aristas desde el origen
+        agregarArista(nuevoGrafo, "R1", "S", "V1", 17);
+        agregarArista(nuevoGrafo, "R2", "S", "V2", 14);
+        agregarArista(nuevoGrafo, "R3", "S", "V3", 14);
+        agregarArista(nuevoGrafo, "R4", "S", "V4", 9);
 
-        // RELACIONES DESDE S
+        // Zona superior
+        agregarArista(nuevoGrafo, "R5", "V1", "V2", 3);
+        agregarArista(nuevoGrafo, "R6", "V1", "V5", 5);
+        agregarArista(nuevoGrafo, "R7", "V1", "V6", 7);
 
-        grafo.agregarRelacion("r1", "S", "v1", 17);
-        grafo.agregarRelacion("r2", "S", "v2", 14);
-        grafo.agregarRelacion("r3", "S", "v3", 14);
-        grafo.agregarRelacion("r4", "S", "v4", 9);
+        // Zona central superior
+        agregarArista(nuevoGrafo, "R8", "V2", "V6", 4);
+        agregarArista(nuevoGrafo, "R9", "V2", "V7", 5);
+        agregarArista(nuevoGrafo, "R10", "V6", "V5", 10); 
+        agregarArista(nuevoGrafo, "R11", "V5", "V10", 17); 
+        agregarArista(nuevoGrafo, "R12", "V6", "V10", 11);
 
-        // RELACIONES DESDE v1
+        // Zona central
+        agregarArista(nuevoGrafo, "R13", "V3", "V7", 4);
+        agregarArista(nuevoGrafo, "R14", "V3", "V8", 7);
+        agregarArista(nuevoGrafo, "R15", "V3", "V4", 5);
+        agregarArista(nuevoGrafo, "R16", "V7", "V8", 2);
+        agregarArista(nuevoGrafo, "R17", "V7", "V11", 7);
 
-        grafo.agregarRelacion("r5", "v1", "v5", 5);
-        grafo.agregarRelacion("r6", "v1", "v2", 3);
-        grafo.agregarRelacion("r7", "v1", "v6", 7);
+        // Zona inferior
+        agregarArista(nuevoGrafo, "R18", "V4", "V8", 7);
+        agregarArista(nuevoGrafo, "R19", "V4", "V9", 8);
+        agregarArista(nuevoGrafo, "R20", "V8", "V11", 15);
+        agregarArista(nuevoGrafo, "R21", "V9", "V11", 9); 
 
-        // RELACIONES DESDE v2
+        // Zona derecha y destino
+        agregarArista(nuevoGrafo, "R22", "V11", "V10", 6); 
+        agregarArista(nuevoGrafo, "R23", "V10", "T", 25);
+        agregarArista(nuevoGrafo, "R24", "V11", "T", 29); 
 
-        grafo.agregarRelacion("r8", "v2", "v6", 4);
-        grafo.agregarRelacion("r9", "v2", "v7", 5);
-
-        // RELACIONES DESDE v5 Y v6
-
-        grafo.agregarRelacion("r10", "v5", "v6", 10);
-        grafo.agregarRelacion("r11", "v5", "v10", 17);
-        grafo.agregarRelacion("r12", "v6", "v10", 11);
-
-        // RELACIONES DESDE v3
-
-        grafo.agregarRelacion("r13", "v3", "v7", 4);
-        grafo.agregarRelacion("r14", "v3", "v8", 7);
-        grafo.agregarRelacion("r15", "v3", "v4", 5);
-
-        // RELACIONES DESDE v7
-
-        grafo.agregarRelacion("r16", "v7", "v8", 2);
-        grafo.agregarRelacion("r17", "v7", "v11", 7);
-
-        // RELACIONES DESDE v8
-
-        grafo.agregarRelacion("r18", "v8", "v11", 15);
-
-        // RELACIONES DESDE v4
-
-        grafo.agregarRelacion("r19", "v4", "v8", 7);
-        grafo.agregarRelacion("r20", "v4", "v9", 8);
-
-        // RELACIONES DESDE v9
-
-        grafo.agregarRelacion("r21", "v9", "v11", 9);
-
-        // RELACIONES DESDE v11
-
-        grafo.agregarRelacion("r22", "v11", "v10", 6);
-        grafo.agregarRelacion("r23", "v10", "T", 25);
-        grafo.agregarRelacion("r24", "v11", "T", 24);
-
-        return grafo;
+        return nuevoGrafo;
     }
 
-    // ==========================================
-    // LEER ENTERO
-    // ==========================================
+    private static void agregarArista(
+            Grafo grafo,
+            String id,
+            String origen,
+            String destino,
+            double capacidad) {
 
-    private static int leerEntero(Scanner scanner) {
-
-        while (!scanner.hasNextInt()) {
-
-            System.out.println("Ingrese un numero entero.");
-
-            scanner.nextLine();
-
-            System.out.print("Intente nuevamente: ");
+        if (!grafo.agregarRelacion(
+                id, origen, destino, capacidad)) {
+            throw new IllegalStateException(
+                    "No se pudo agregar la relación: "
+                    + origen + " -> " + destino);
         }
-
-        int numero = scanner.nextInt();
-
-        scanner.nextLine();
-
-        return numero;
     }
 
-    // ==========================================
-    // LEER DOUBLE
-    // ==========================================
+    private static void agregarVertice() {
+        System.out.print("ID del vértice: ");
+        String id = scanner.nextLine().trim();
 
-    private static double leerDouble(Scanner scanner) {
+        System.out.print("Dato o nombre: ");
+        String dato = scanner.nextLine().trim();
 
-        while (!scanner.hasNextDouble()) {
+        System.out.println(
+                grafo.agregarVertice(id, dato)
+                ? "Vértice agregado."
+                : "No se pudo agregar el vértice.");
+    }
 
-            System.out.println("Ingrese un numero valido.");
+    private static void actualizarVertice() {
+        System.out.print("ID del vértice: ");
+        String id = scanner.nextLine().trim();
 
-            scanner.nextLine();
+        System.out.print("Nuevo dato: ");
+        String dato = scanner.nextLine().trim();
 
-            System.out.print("Intente nuevamente: ");
+        System.out.println(
+                grafo.actualizarVertice(id, dato)
+                ? "Vértice actualizado."
+                : "No existe ese vértice.");
+    }
+
+    private static void eliminarVertice() {
+        System.out.print("ID del vértice: ");
+        String id = scanner.nextLine().trim();
+
+        System.out.println(
+                grafo.eliminarVertice(id)
+                ? "Vértice eliminado."
+                : "No existe ese vértice.");
+    }
+
+    private static void agregarRelacion() {
+        System.out.print("ID de la relación: ");
+        String id = scanner.nextLine().trim();
+
+        System.out.print("Vértice de origen: ");
+        String origen = scanner.nextLine().trim();
+
+        System.out.print("Vértice de destino: ");
+        String destino = scanner.nextLine().trim();
+
+        double peso = leerDouble("Peso o capacidad: ");
+
+        System.out.println(
+                grafo.agregarRelacion(id, origen, destino, peso)
+                ? "Relación agregada."
+                : "No se pudo agregar la relación.");
+    }
+
+    private static void actualizarRelacion() {
+        System.out.print("ID de la relación: ");
+        String id = scanner.nextLine().trim();
+
+        double peso = leerDouble("Nuevo peso/capacidad: ");
+
+        System.out.println(
+                grafo.actualizarRelacion(id, peso)
+                ? "Relación actualizada."
+                : "No se pudo actualizar la relación.");
+    }
+
+    private static void eliminarRelacion() {
+        System.out.print("ID de la relación: ");
+        String id = scanner.nextLine().trim();
+
+        System.out.println(
+                grafo.eliminarRelacion(id)
+                ? "Relación eliminada."
+                : "No existe esa relación.");
+    }
+
+    private static boolean validarGrafoFlujo() {
+        if (!grafo.esDirigido()) {
+            System.out.println(
+                    "Error: el flujo máximo requiere un grafo dirigido.");
+            System.out.println(
+                    "Cree un grafo dirigido o genere el grafo de ejemplo.");
+            return false;
         }
 
-        double numero = scanner.nextDouble();
+        return true;
+    }
 
-        scanner.nextLine();
+    private static String[] solicitarExtremos() {
+        System.out.print("Origen [S]: ");
+        String origen = scanner.nextLine().trim();
 
-        return numero;
+        System.out.print("Destino [T]: ");
+        String destino = scanner.nextLine().trim();
+
+        if (origen.isEmpty()) {
+            origen = "S";
+        }
+
+        if (destino.isEmpty()) {
+            destino = "T";
+        }
+
+        return new String[]{origen, destino};
+    }
+
+    private static void ejecutarFordFulkerson() {
+        if (!validarGrafoFlujo()) {
+            return;
+        }
+
+        try {
+            String[] extremos = solicitarExtremos();
+
+            ResultadoFlujo resultado = FordFulkerson.ejecutar(
+                    grafo, extremos[0], extremos[1]);
+
+            mostrarResultado("FORD-FULKERSON", resultado);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void ejecutarEdmondsKarp() {
+        if (!validarGrafoFlujo()) {
+            return;
+        }
+
+        try {
+            String[] extremos = solicitarExtremos();
+
+            ResultadoFlujo resultado = EdmondsKarp.ejecutar(
+                    grafo, extremos[0], extremos[1]);
+
+            mostrarResultado("EDMONDS-KARP", resultado);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void compararAlgoritmos() {
+        if (!validarGrafoFlujo()) {
+            return;
+        }
+
+        ComparadorFlujo.ejecutar(grafo, scanner);
+    }
+
+    private static void mostrarResultado(
+            String titulo, ResultadoFlujo resultado) {
+
+        System.out.println("\n=== " + titulo + " ===");
+
+        System.out.printf(
+                "Flujo máximo: %.4f%n",
+                resultado.getFlujoMaximo());
+
+        System.out.printf(
+                "Tiempo: %.6f ms%n",
+                resultado.getTiempoMilisegundos());
+
+        System.out.println(
+                "Iteraciones: " + resultado.getIteraciones());
+
+        System.out.println(
+                "Inspecciones de aristas: "
+                + resultado.getInspeccionesAristas());
+    }
+
+    private static int leerEntero(String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+
+            try {
+                return Integer.parseInt(
+                        scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println(
+                        "Ingrese un número entero válido.");
+            }
+        }
+    }
+
+    private static double leerDouble(String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+
+            try {
+                double valor = Double.parseDouble(
+                        scanner.nextLine().trim().replace(',', '.'));
+
+                if (Double.isFinite(valor) && valor >= 0) {
+                    return valor;
+                }
+            } catch (NumberFormatException ignored) {
+                // Se muestra el mensaje de error abajo.
+            }
+
+            System.out.println(
+                    "Ingrese un número finito no negativo.");
+        }
     }
 }

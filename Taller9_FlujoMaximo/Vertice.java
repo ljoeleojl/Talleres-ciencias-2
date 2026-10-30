@@ -1,4 +1,3 @@
-
 public class Vertice {
 
     private String id;
@@ -27,9 +26,6 @@ public class Vertice {
 
     @Override
     public String toString() {
-        return "Vertice{" +
-                "id='" + id + '\'' +
-                ", dato='" + dato + '\'' +
-                '}';
+        return dato + " (" + id + ")";
     }
 }

@@ -1,73 +1,39 @@
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class ResultadoFlujo {
 
-    private double flujoMaximo;
-    private List<String> caminos;
-    private List<Double> flujosCaminos;
+    private final double flujoMaximo;
+    private final long tiempoNanosegundos;
+    private final long iteraciones;
+    private final long inspeccionesAristas;
 
-    public ResultadoFlujo(double flujoMaximo) {
+    public ResultadoFlujo(
+            double flujoMaximo,
+            long tiempoNanosegundos,
+            long iteraciones,
+            long inspeccionesAristas) {
 
         this.flujoMaximo = flujoMaximo;
-        this.caminos = new ArrayList<>();
-        this.flujosCaminos = new ArrayList<>();
+        this.tiempoNanosegundos = tiempoNanosegundos;
+        this.iteraciones = iteraciones;
+        this.inspeccionesAristas = inspeccionesAristas;
     }
 
     public double getFlujoMaximo() {
         return flujoMaximo;
     }
 
-    public List<String> getCaminos() {
-        return new ArrayList<>(caminos);
+    public long getTiempoNanosegundos() {
+        return tiempoNanosegundos;
     }
 
-    public List<Double> getFlujosCaminos() {
-        return new ArrayList<>(flujosCaminos);
+    public double getTiempoMilisegundos() {
+        return tiempoNanosegundos / 1_000_000.0;
     }
 
-    public void agregarCamino(
-            String camino,
-            double flujo) {
-
-        caminos.add(camino);
-        flujosCaminos.add(flujo);
+    public long getIteraciones() {
+        return iteraciones;
     }
 
-    public void mostrarResultado() {
-
-        System.out.println("\n==================================");
-        System.out.println("          RESULTADO");
-        System.out.println("==================================");
-
-        if (caminos.isEmpty()) {
-
-            System.out.println(
-                    "No se encontraron caminos aumentantes."
-            );
-
-        } else {
-
-            System.out.println("\nCaminos aumentantes:");
-
-            for (int i = 0; i < caminos.size(); i++) {
-
-                System.out.println(
-                        (i + 1) + ". "
-                        + caminos.get(i)
-                        + " | Flujo enviado: "
-                        + flujosCaminos.get(i)
-                );
-            }
-        }
-
-        System.out.println("\n----------------------------------");
-
-        System.out.println(
-                "FLUJO MAXIMO: " + flujoMaximo
-        );
-
-        System.out.println("==================================");
+    public long getInspeccionesAristas() {
+        return inspeccionesAristas;
     }
 }

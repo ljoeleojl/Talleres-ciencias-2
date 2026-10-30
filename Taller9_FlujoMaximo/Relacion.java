@@ -1,4 +1,3 @@
-
 public class Relacion {
 
     private String id;
@@ -59,7 +58,6 @@ public class Relacion {
     }
 
     public String obtenerOtroVertice(String idVertice) {
-
         if (vertice1.equals(idVertice)) {
             return vertice2;
         }
@@ -73,11 +71,7 @@ public class Relacion {
 
     @Override
     public String toString() {
-        return "Relacion{" +
-                "id='" + id + '\'' +
-                ", vertice1='" + vertice1 + '\'' +
-                ", vertice2='" + vertice2 + '\'' +
-                ", peso=" + peso +
-                '}';
+        return vertice1 + " -> " + vertice2
+                + " (capacidad: " + peso + ")";
     }
 }

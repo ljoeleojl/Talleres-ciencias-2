@@ -1,255 +1,218 @@
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
 public class EdmondsKarp {
 
+    // Margen de tolerancia para comparar valores decimales.
     private static final double EPSILON = 1e-9;
 
-    // ==========================================
-    // EJECUTAR EDMONDS-KARP
-    // ==========================================
-
     public static ResultadoFlujo ejecutar(
-            Grafo grafo,
-            String origen,
-            String destino) {
+            Grafo grafo, String origen, String destino) {
 
-        validarEntrada(grafo, origen, destino);
+        // Comprueba que el grafo sea válido y que los vértices
+        // de origen y destino existan.
+        FordFulkerson.validarEntrada(grafo, origen, destino);
 
-        int n = grafo.getVertices().size();
+        // Registra el instante inicial para medir el tiempo de ejecución.
+        long inicio = System.nanoTime();
 
-        int s = grafo.obtenerIndiceVertice(origen);
-        int t = grafo.obtenerIndiceVertice(destino);
+        // Obtiene la lista de vértices y su cantidad.
+        List<Vertice> vertices = grafo.getVertices();
+        int n = vertices.size();
 
-        double[][] residual = construirRedResidual(grafo);
+        // Convierte los identificadores de origen y destino
+        // en sus posiciones dentro de la lista de vértices.
+        int indiceOrigen =
+                FordFulkerson.obtenerIndice(vertices, origen);
 
+        int indiceDestino =
+                FordFulkerson.obtenerIndice(vertices, destino);
+
+        // Construye la matriz residual con las capacidades iniciales.
+        // Esta matriz representa la capacidad que todavía se puede utilizar
+        // para enviar flujo entre cada par de vértices.
+        double[][] residual =
+                FordFulkerson.construirMatrizResidual(
+                        grafo, vertices);
+
+        // Inicializa las variables que almacenan los resultados.
         double flujoMaximo = 0;
+        long iteraciones = 0;
+        long inspecciones = 0;
 
-        ResultadoFlujo resultado =
-                new ResultadoFlujo(0);
+        // Busca caminos aumentantes hasta que ya no exista
+        // un camino disponible desde el origen hasta el destino.
+        while (true) {
 
-        int[] padre = new int[n];
+            // El arreglo padre permite reconstruir el camino encontrado.
+            // padre[v] almacena el vértice anterior a v en el camino.
+            int[] padre = new int[n];
+            Arrays.fill(padre, -1);
 
-        // ======================================
-        // BUSCAR CAMINOS AUMENTANTES
-        // ======================================
+            // Contador de posiciones de la matriz residual inspeccionadas
+            // durante la búsqueda BFS.
+            long[] contador = new long[1];
 
-        while (buscarCaminoBFS(
-                residual, s, t, padre)) {
-
-            double flujoCamino =
-                    Double.POSITIVE_INFINITY;
-
-            // Encontrar capacidad minima.
-
-            for (int v = t; v != s; v = padre[v]) {
-
-                int u = padre[v];
-
-                flujoCamino = Math.min(
-                        flujoCamino,
-                        residual[u][v]
-                );
-            }
-
-            // Actualizar red residual.
-
-            for (int v = t; v != s; v = padre[v]) {
-
-                int u = padre[v];
-
-                residual[u][v] -= flujoCamino;
-
-                residual[v][u] += flujoCamino;
-            }
-
-            flujoMaximo += flujoCamino;
-
-            // Guardar camino encontrado.
-
-            String camino = construirCamino(
-                    grafo,
+            // Busca un camino aumentante utilizando BFS.
+            boolean encontrado = bfs(
+                    indiceOrigen,
+                    indiceDestino,
+                    residual,
                     padre,
-                    s,
-                    t
-            );
+                    contador);
 
-            resultado.agregarCamino(
-                    camino,
-                    flujoCamino
-            );
+            // Acumula las inspecciones realizadas en esta búsqueda.
+            inspecciones += contador[0];
+
+            // Si no se encontró un camino, se alcanzó el flujo máximo.
+            if (!encontrado) {
+                break;
+            }
+
+            // Inicializa el flujo aumentante con infinito.
+            // Después se calculará el mínimo de las capacidades
+            // disponibles en todas las aristas del camino.
+            double flujoAumentante = Double.POSITIVE_INFINITY;
+
+            // Comienza a recorrer el camino desde el destino
+            // hasta llegar al origen, utilizando el arreglo padre.
+            int actual = indiceDestino;
+
+            while (actual != indiceOrigen) {
+
+                // Obtiene el vértice anterior en el camino.
+                int anterior = padre[actual];
+
+                // Actualiza el flujo aumentante con la menor capacidad
+                // residual encontrada hasta el momento.
+                flujoAumentante = Math.min(
+                        flujoAumentante,
+                        residual[anterior][actual]);
+
+                // Continúa hacia el vértice anterior.
+                actual = anterior;
+            }
+
+            // Evita procesar flujos nulos, demasiado pequeños
+            // o valores que no sean finitos.
+            if (flujoAumentante <= EPSILON
+                    || !Double.isFinite(flujoAumentante)) {
+                break;
+            }
+
+            // Recorre nuevamente el camino para actualizar
+            // las capacidades de la matriz residual.
+            actual = indiceDestino;
+
+            while (actual != indiceOrigen) {
+
+                // Obtiene el vértice anterior en el camino.
+                int anterior = padre[actual];
+
+                // Reduce la capacidad disponible de la arista utilizada,
+                // porque se acaba de enviar flujo por ella.
+                residual[anterior][actual] -= flujoAumentante;
+
+                // Si el valor residual es prácticamente cero,
+                // lo establece exactamente en cero para evitar
+                // errores de precisión con números decimales.
+                if (Math.abs(residual[anterior][actual]) < EPSILON) {
+                    residual[anterior][actual] = 0;
+                }
+
+                // Aumenta la capacidad residual en sentido contrario.
+                // Esto permite devolver flujo o modificar decisiones
+                // tomadas en caminos aumentantes anteriores.
+                residual[actual][anterior] += flujoAumentante;
+
+                // Continúa recorriendo el camino hacia el origen.
+                actual = anterior;
+            }
+
+            // Suma el flujo enviado por el camino encontrado
+            // al flujo máximo acumulado.
+            flujoMaximo += flujoAumentante;
+
+            // Cuenta una iteración por cada camino aumentante utilizado.
+            iteraciones++;
         }
 
-        // ======================================
-        // RESULTADO FINAL
-        // ======================================
+        // Calcula el tiempo total de ejecución en nanosegundos.
+        long tiempo = System.nanoTime() - inicio;
 
-        ResultadoFlujo finalResultado =
-                new ResultadoFlujo(flujoMaximo);
-
-        for (int i = 0;
-                i < resultado.getCaminos().size();
-                i++) {
-
-            finalResultado.agregarCamino(
-                    resultado.getCaminos().get(i),
-                    resultado.getFlujosCaminos().get(i)
-            );
-        }
-
-        return finalResultado;
+        // Devuelve el flujo máximo y las métricas de ejecución.
+        return new ResultadoFlujo(
+                flujoMaximo,
+                tiempo,
+                iteraciones,
+                inspecciones);
     }
 
-    // ==========================================
-    // BUSQUEDA BFS
-    // ==========================================
-
-    private static boolean buscarCaminoBFS(
-            double[][] residual,
+    // Implementa la búsqueda en anchura (BFS).
+    // Su objetivo es encontrar un camino desde el origen
+    // hasta el destino utilizando únicamente capacidades residuales positivas.
+    private static boolean bfs(
             int origen,
             int destino,
-            int[] padre) {
+            double[][] residual,
+            int[] padre,
+            long[] inspecciones) {
 
-        int n = residual.length;
+        // Indica qué vértices ya fueron visitados para evitar
+        // recorrer varias veces el mismo vértice.
+        boolean[] visitado = new boolean[residual.length];
 
-        boolean[] visitado = new boolean[n];
+        // La cola permite procesar los vértices en orden de llegada,
+        // característica principal de la búsqueda en anchura.
+        Queue<Integer> cola = new ArrayDeque<>();
 
-        for (int i = 0; i < n; i++) {
-            padre[i] = -1;
-        }
-
-        Queue<Integer> cola = new LinkedList<>();
-
+        // Introduce el vértice de origen en la cola y lo marca como visitado.
         cola.add(origen);
-
         visitado[origen] = true;
 
+        // Continúa mientras existan vértices pendientes por explorar.
         while (!cola.isEmpty()) {
 
+            // Extrae el primer vértice de la cola.
             int actual = cola.poll();
 
-            for (int vecino = 0;
-                    vecino < n;
-                    vecino++) {
+            // Examina las posibles conexiones del vértice actual
+            // con todos los demás vértices.
+            for (int siguiente = 0;
+                    siguiente < residual.length;
+                    siguiente++) {
 
-                if (!visitado[vecino]
-                        && residual[actual][vecino] > EPSILON) {
+                // Registra que se inspeccionó una posición de la matriz.
+                inspecciones[0]++;
 
-                    padre[vecino] = actual;
+                // Comprueba que el siguiente vértice no haya sido visitado
+                // y que exista capacidad residual para llegar hasta él.
+                if (!visitado[siguiente]
+                        && residual[actual][siguiente] > EPSILON) {
 
-                    visitado[vecino] = true;
+                    // Registra el vértice anterior para reconstruir el camino.
+                    padre[siguiente] = actual;
 
-                    if (vecino == destino) {
+                    // Marca el vértice como visitado.
+                    visitado[siguiente] = true;
+
+                    // Si se alcanzó el destino, se encontró un camino.
+                    // Se termina la búsqueda inmediatamente.
+                    if (siguiente == destino) {
                         return true;
                     }
 
-                    cola.add(vecino);
+                    // Si todavía no es el destino, se agrega a la cola
+                    // para explorar sus conexiones posteriormente.
+                    cola.add(siguiente);
                 }
             }
         }
 
+        // Si se vació la cola sin alcanzar el destino,
+        // no existe un camino aumentante disponible.
         return false;
-    }
-
-    // ==========================================
-    // CONSTRUIR RED RESIDUAL
-    // ==========================================
-
-    private static double[][] construirRedResidual(
-            Grafo grafo) {
-
-        int n = grafo.getVertices().size();
-
-        double[][] residual = new double[n][n];
-
-        for (Relacion r : grafo.getRelaciones()) {
-
-            int origen =
-                    grafo.obtenerIndiceVertice(
-                            r.getVertice1()
-                    );
-
-            int destino =
-                    grafo.obtenerIndiceVertice(
-                            r.getVertice2()
-                    );
-
-            residual[origen][destino] += r.getPeso();
-        }
-
-        return residual;
-    }
-
-    // ==========================================
-    // CONSTRUIR CAMINO
-    // ==========================================
-
-    private static String construirCamino(
-            Grafo grafo,
-            int[] padre,
-            int origen,
-            int destino) {
-
-        List<String> camino = new ArrayList<>();
-
-        for (int actual = destino;
-                actual != -1;
-                actual = padre[actual]) {
-
-            camino.add(
-                    grafo.getVertices()
-                            .get(actual)
-                            .getId()
-            );
-
-            if (actual == origen) {
-                break;
-            }
-        }
-
-        Collections.reverse(camino);
-
-        return String.join(" -> ", camino);
-    }
-
-    // ==========================================
-    // VALIDAR ENTRADA
-    // ==========================================
-
-    private static void validarEntrada(
-            Grafo grafo,
-            String origen,
-            String destino) {
-
-        if (grafo == null) {
-            throw new IllegalArgumentException(
-                    "El grafo no puede ser nulo."
-            );
-        }
-
-        if (!grafo.esDirigido()) {
-            throw new IllegalArgumentException(
-                    "Edmonds-Karp requiere un grafo dirigido."
-            );
-        }
-
-        if (origen == null || destino == null
-                || grafo.buscarVertice(origen) == null
-                || grafo.buscarVertice(destino) == null) {
-
-            throw new IllegalArgumentException(
-                    "El origen o destino no existe."
-            );
-        }
-
-        if (origen.equals(destino)) {
-            throw new IllegalArgumentException(
-                    "El origen y el destino deben ser diferentes."
-            );
-        }
     }
 }
